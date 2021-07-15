@@ -29,8 +29,8 @@
                     </span>
                 </div>
                 <div class="action">
-                    <a href="">Edit</a>
-                    <a href="">Delete</a>
+                    <a href="@Url.Action("Edit","Course",new { id= course.id})">Edit</a>
+                    <a href="@Url.Action("Delete","Course",new { id= course.id})">Delete</a>
                 </div>
             </li>
         }

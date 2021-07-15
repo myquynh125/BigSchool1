@@ -67,5 +67,76 @@ namespace BigSchool1.Controllers
             }
             return View(courses);
         }
+        public ActionResult Edit(int? id)
+        {
+            BigSchoolContext context = new BigSchoolContext();
+            ApplicationUser currentUser = System.Web.HttpContext.Current.GetOwinContext().
+            GetUserManager<ApplicationUserManager>().FindById(System.Web.HttpContext.Current.User.Identity.GetUserId());
+
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            Cours course = context.Courses.Where(c => c.id == id && c.LectureId == currentUser.Id).FirstOrDefault();
+            if (course == null)
+            {
+                return HttpNotFound();
+            }
+            ViewBag.CategoryId = new SelectList(context.Categories, "Id", "Name", course.CategoryId);
+            return View(course);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit([Bind(Include = "id,LectureId,Place,DateTime,CategoryId")] Cours course)
+        {
+            ApplicationUser currentUser = System.Web.HttpContext.Current.GetOwinContext().
+            GetUserManager<ApplicationUserManager>().FindById(System.Web.HttpContext.Current.User.Identity.GetUserId());
+            BigSchoolContext context = new BigSchoolContext();
+            course.LectureId = currentUser.Id;
+            if (ModelState.IsValid)
+            {
+                context.Entry(course).State = EntityState.Modified;
+                context.SaveChanges();
+                return RedirectToAction("Mine");
+            }
+            ViewBag.CategoryId = new SelectList(context.Categories, "Id", "Name", course.CategoryId);
+            return View(course);
+        }
+        public ActionResult Delete(int? id)
+        {
+            BigSchoolContext context = new BigSchoolContext();
+            ApplicationUser currentUser = System.Web.HttpContext.Current.GetOwinContext().
+            GetUserManager<ApplicationUserManager>().FindById(System.Web.HttpContext.Current.User.Identity.GetUserId());
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            Cours course = context.Courses.Where(c => c.id == id && c.LectureId == currentUser.Id).FirstOrDefault();
+            if (course == null)
+            {
+                return HttpNotFound();
+            }
+            return View(course);
+        }
+
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteConfirmed(int id)
+        {
+            BigSchoolContext context = new BigSchoolContext();
+            ApplicationUser currentUser = System.Web.HttpContext.Current.GetOwinContext().
+            GetUserManager<ApplicationUserManager>().FindById(System.Web.HttpContext.Current.User.Identity.GetUserId());
+            Cours course = context.Courses.Where(c => c.id == id && c.LectureId == currentUser.Id).FirstOrDefault();
+            Attendence attendance = context.Attendences.Where(a => a.CourseId == id).FirstOrDefault();
+            context.Courses.Remove(course);
+            if (attendance != null)
+            {
+                context.Attendences.Remove(attendance);
+
+            }
+            context.SaveChanges();
+            return RedirectToAction("Mine");
+        }
     }
 }
