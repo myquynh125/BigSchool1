@@ -11,34 +11,57 @@
     <ul>
         @foreach (var course in Model)
         {
-<li>
-    @course.DateTime.ToString("dd/MM/yyyy HH:mm") - @course.Name - @course.Category.Name
-</li>            }
+            <li>
+            @course.DateTime.ToString("dd/MM/yyyy HH:mm") - @course.Name - @course.Category.Name
+            </li>            
+        }
     </ul>
 </div>
 <div class="row">
     <ul class=" course">
         @foreach (var course in Model)
         {
-<li>
-    <div class="date">
+        <li>
+        <div class="date">
         <div class="month">
             @course.DateTime.ToString("MM")
         </div>
         <div class="day">
             @course.DateTime.ToString("dd")
         </div>
-    </div>
-    <div class="details">
+        </div>
+        <div class="details">
         <span class="lecture">
             @course.Name
+            @if (course.isLogin)
+            {
+                if (course.isShowFollow)
+                {
+                    <button data-course-id="@course.LectureId" class="btn btn-default btn-sm js-tongle-follow">Follow</button>
+                }
+                else
+                {
+                    <button data-course-id="@course.LectureId" class="btn btn-default btn-sm js-tongle-follow">Following</button>
+                }
+            }
         </span>
         <span class="category">
             @course.Category.Name
-        </span>
-        <button data-course-id="@course.id" class="btn btn-default btn-sm js-tongle-attendence">Going ?</button>
+            @if (course.isLogin)
+            {
+                if (course.isShowGoing)
+                {
+                    <button data-course-id="@course.id" class="btn btn-default btn-sm js-tongle-attendence">Going ?</button>
+                }
+                else
+                {
+                        <button data-course-id="@course.id" class="btn btn-default btn-sm js-tongle-attendence">Going</button>
+                }
+            }
+        </span>    
     </div>
-</li>            }
+    </li>  
+        }
     </ul>
     @section scripts{
 
@@ -46,17 +69,58 @@
             $(".js-tongle-attendence").click(function (e){
                 var button = $(e.target);
                 $.post("api/attendences", { Id: button.attr("data-course-id") })
-                    .done(function () {
-                        alert("Register course sucsessfully")
-                        button
-                            .removeClass("btn-default")
-                            .addClass("btn-info")
-                            .text("Going");
+                    .done(function (result) {
+                        if (result == "cancel") {
+                            alert("Cancel register course sucsessfully")
+                            button
+                                .removeClass("btn-info")
+                                .addClass("btn-default")
+                                .text("Going ?");
+                        } else {
+                            alert("Register course sucsessfully")
+                            button
+                                .removeClass("btn-default")
+                                .addClass("btn-info")
+                                .text("Going");
+                        }
                     }).fail(function () {
                         alert("Something fail");
                     });
             });
-        });</script>
+    $(".js-tongle-follow").click(function (e) {
+        var button = $(e.target);
+        var followee = button.attr("data-user-id");
+        $.post("api/followings", { FolloweeId: button.attr("data-course-id") })
+            .done(function (result) {
+                if (result == "cancel") {
+                    $('.js-tongle-follow').each(function (i, obj) {
+                        if ($(this).attr('data-user-id') == followee) {
+                            $(this).removeClass("btn-success")
+                                .addClass("btn-default")
+                                .text("Follow")
+                        }
+                    });
+                    alert("Unfollow successfully")
+                    
+                } else {
+                    $('.js-tongle-follow').each(function (i, obj) {
+                        if ($(this).attr('data-user-id') == followee) {
+                            $(this).removeClass("btn-default")
+                                .addClass("btn-success")
+                                .text("Following")
+                        }
+                    });
+                    alert("Follow successfully")
+                }
+            }).fail(function () {
+                alert("Something fail");
+
+            })
+    })
+});
+            
+
+        </script>
     }
 
 </div>

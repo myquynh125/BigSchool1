@@ -12,9 +12,10 @@ namespace BigSchool1.Models
         {
         }
 
+        public virtual DbSet<Attendence> Attendences { get; set; }
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Cours> Courses { get; set; }
-        public virtual DbSet<Attendence> Attendences { get; set; }
+        public virtual DbSet<Following> Followings { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

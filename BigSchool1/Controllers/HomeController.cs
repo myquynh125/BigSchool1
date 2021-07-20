@@ -16,10 +16,24 @@ namespace BigSchool1.Controllers
             BigSchoolContext context = new BigSchoolContext();
             
             var upcommingCourse = context.Courses.Where(p => p.DateTime > DateTime.Now).OrderBy(p => p.DateTime).ToList();
+            var userID = User.Identity.GetUserId();
+
             foreach (Cours i in upcommingCourse)
             {
-                ApplicationUser user = System.Web.HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>().FindById(i.LectureId);
+                ApplicationUser user = System.Web.HttpContext.Current.GetOwinContext().
+                GetUserManager<ApplicationUserManager>().FindById(i.LectureId);
                 i.Name = user.Name;
+                if (userID != null)
+                {
+                    i.isLogin = true;
+                    Attendence find = context.Attendences.FirstOrDefault(p => p.CourseId == i.id && p.Attendee == userID);
+                    if (find != null)
+                        i.isShowGoing = true;
+                    Following findFollow = context.Followings.FirstOrDefault(p => p.FollowerId == userID && 
+                    p.FolloweeId == i.LectureId);
+                    if (findFollow == null)
+                        i.isShowFollow = true;
+                }
             }
             return View(upcommingCourse);
            
@@ -28,7 +42,7 @@ namespace BigSchool1.Controllers
         public ActionResult About()
         {
             ViewBag.Message = "Your application description page.";
-
+            
             return View();
         }
 
